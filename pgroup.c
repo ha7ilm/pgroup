@@ -1,10 +1,10 @@
 #include <stdio.h>
-//#include <dirent.h>
 #include <unistd.h>
-//#include <sys/types.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define MYNAME "pgroup"
 
@@ -35,13 +35,13 @@ int main(int argc, char *argv[])
 
 	childpid = fork();
 	if(!childpid) if(execvp(argv[1+!!force],argv+1+!!force)) { fprintf(stderr, MYNAME ": can't start subprocess, error in execvp().\n"); return -1; }
-    struct sigaction sa;
+	struct sigaction sa;
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = sig_handler;
 	sigaction(SIGTERM, &sa, NULL);
-    sigaction(SIGKILL, &sa, NULL);
-    sigaction(SIGQUIT, &sa, NULL);
-    sigaction(SIGINT, &sa, NULL);
+	sigaction(SIGKILL, &sa, NULL);
+	sigaction(SIGQUIT, &sa, NULL);
+	sigaction(SIGINT, &sa, NULL);
 
 	int wait_stat;
 	wait(&wait_stat);
@@ -54,6 +54,9 @@ int main(int argc, char *argv[])
 //original idea was to get a list of the child processes from /sys/proc and then kill them one by one:
 
 #if 0
+
+#include <dirent.h>
+#include <sys/types.h>
 
 typedef struct child_s
 {
