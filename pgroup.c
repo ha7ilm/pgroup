@@ -8,6 +8,48 @@
 
 #define MYNAME "pgroup"
 
+
+pid_t pgrp = 0;
+int force = 0;
+pid_t childpid = 0;
+
+char usage[] = MYNAME ": tool for grouping processes to terminate together\n\n"
+	"Example of usage:\n\n"
+	"\tpgroup bash -c \"any_process | any_other_process | some_more_processes\"\n\n"
+	"Now it is enough to kill the parent process to kill all the child processes as well.\n\n"
+	"If you want to send SIGKILL to all child processes instead of forwarding the original signal caught by pgroup, add the -9 switch:\n\n"
+	"\tpgroup -9 bash -c \"rtl_sdr - | csdr convert_u8_f > ~/float_iqdata\"\n\n"
+;
+void sig_handler(int signo)
+{
+	if(!force) killpg(pgrp, signo);
+	else killpg(pgrp, force);
+	exit(0);
+}
+
+int main(int argc, char *argv[])
+{
+	if(argc==1) { fprintf(stderr,"%s",usage); return 0; }
+	if(argc>=2 && !strcmp(argv[1],"-9") ) { force=SIGKILL; }
+	pgrp = setpgrp();
+
+	childpid = fork();
+	if(!childpid) execvp(argv[1+!!force],argv+1+!!force);
+    struct sigaction sa;
+	memset(&sa, 0, sizeof(sa));
+	sa.sa_handler = sig_handler;
+	sigaction(SIGTERM, &sa, NULL);
+    sigaction(SIGKILL, &sa, NULL);
+    sigaction(SIGQUIT, &sa, NULL);
+    sigaction(SIGINT, &sa, NULL);
+	pause();
+}
+
+
+
+
+//original idea was to get a list of the child processes from /sys/proc and then kill them one by one:
+
 #if 0
 
 typedef struct child_s
@@ -71,41 +113,3 @@ int main(int argc, char *argv[])
 }
 
 #endif
-
-pid_t pgrp = 0;
-int force = 0;
-pid_t childpid = 0;
-
-char usage[] = MYNAME ": tool for grouping processes to terminate together\n";
-
-void sig_handler(int signo)
-{
-	if(!force) killpg(pgrp, signo);
-	else killpg(pgrp, SIGTERM);
-	/* if(force) for(;;)
-	{
-		usleep(50000);
-		if(!kill(childpid, 0)) { killpg(pgrp, SIGTERM); fprintf(stderr,"a"); }
-		else break;
-	} */
-	exit(0);
-}
-
-int main(int argc, char *argv[])
-{
-	if(argc==1) { fprintf(stderr,"%s",usage); return 0; }
-	if(argc>=2 && ( !strcmp(argv[1],"-f") || !strcmp(argv[1],"--force")) ) { fprintf(stderr, MYNAME ": force\n"); force=1; }
-	pgrp = setpgrp();
-
-	childpid = fork();
-	if(!childpid) execvp(argv[1+force],argv+1+force);
-    struct sigaction sa;
-	memset(&sa, 0, sizeof(sa));
-	sa.sa_handler = sig_handler;
-	sigaction(SIGTERM, &sa, NULL);
-    sigaction(SIGKILL, &sa, NULL);
-    sigaction(SIGQUIT, &sa, NULL);
-    sigaction(SIGINT, &sa, NULL);
-
-	pause();
-}
