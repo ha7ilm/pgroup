@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 	pgrp = setpgrp();
 
 	childpid = fork();
-	if(!childpid) execvp(argv[1+!!force],argv+1+!!force);
+	if(!childpid) if(execvp(argv[1+!!force],argv+1+!!force)) { fprintf(stderr, MYNAME ": can't start subprocess, error in execvp().\n"); return -1; }
     struct sigaction sa;
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = sig_handler;
@@ -42,7 +42,10 @@ int main(int argc, char *argv[])
     sigaction(SIGKILL, &sa, NULL);
     sigaction(SIGQUIT, &sa, NULL);
     sigaction(SIGINT, &sa, NULL);
-	pause();
+
+	int wait_stat;
+	wait(&wait_stat);
+	sig_handler(SIGTERM);
 }
 
 

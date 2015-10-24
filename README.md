@@ -11,4 +11,8 @@ The parameter `-9` tells pgroup to send SIGKILL to all subprocesses instead of s
 
 For example, if you use `-9` and send SIGTERM to **pgroup**, it will send SIGKILL to all of its child processes.
 
+## Installing pgroup
 
+**pgroup** requires Linux to run. You can build it with *gcc* by:
+
+    make && sudo make install
