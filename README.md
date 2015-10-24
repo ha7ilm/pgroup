@@ -58,7 +58,7 @@ void MainWindow::startAndStopSomeProcesses()
 
 ## How does it work
 
-If the pgroup process is started, it calls <a href="http://www.unix.com/man-page/linux/3/setpgrp/">setpgrp()</a>, so it becomes a session leader. 
+When the **pgroup** process is started, it calls <a href="http://www.unix.com/man-page/linux/3/setpgrp/">setpgrp()</a>, so it becomes a session leader. 
 
 Later it uses <a href="http://www.unix.com/man-page/linux/3/killpg">killpg()</a> to send a signal to its process group.
 
