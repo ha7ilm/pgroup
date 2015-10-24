@@ -32,6 +32,14 @@ echo
 pstree $$ #Now we don't see pgroup and the [cat]s anymore.
 ```
 
+This would be the output of this script:
+
+    ha7ilm@linux ~ $ bash test.sh
+    bash─┬─pgroup───bash───3*[cat]
+         └─pstree
+    
+    bash───pstree
+
 ## How to use in Qt
 
 ```C++
