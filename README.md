@@ -56,3 +56,15 @@ void MainWindow::startAndStopSomeProcesses()
 }
 ```
 
+## How does it work
+
+If the pgroup process is started, it calls <a href="http://www.unix.com/man-page/linux/3/setpgrp/">setpgrp()</a>, so it becomes a session leader. 
+
+Later it uses <a href="http://www.unix.com/man-page/linux/3/killpg">killpg()</a> to send a signal to its process group.
+
+It does not check if the signal is handled by all the processes in the group. 
+
+If you want to be absolutely sure that all subprocesses are terminated, you should use the `-9` switch.
+* The subprocesses cannot handle the SIGKILL signal, they are just stopped by the OS anyway.
+* On the other hand, they cannot properly close files and things, so only use it if necessary.
+
