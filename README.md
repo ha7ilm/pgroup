@@ -43,7 +43,7 @@ void MainWindow::startAndStopSomeProcesses()
 {
 	QProcess proc;
 	proc.start("pgroup -9 bash -c \"cat /dev/urandom | cat | cat >/dev/null\"");
-	//proc.kill() //If we did that, the subprocesses would have remained.
+	//proc.kill(); //If we did that, the subprocesses would have remained.
 	kill(proc.pid(), SIGTERM); //Now we can make sure that all subprocesses were killed properly.
 }
 ```
