@@ -29,6 +29,7 @@ THE SOFTWARE.
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/prctl.h>
 
 #define MYNAME "pgroup"
 
@@ -45,9 +46,12 @@ char usage[] = MYNAME ": tool for grouping processes to terminate together\n\n"
 	"\tpgroup -9 bash -c \"rtl_sdr - | csdr convert_u8_f > ~/float_iqdata\"\n\n"
 ;
 void sig_handler(int signo)
-{
-	if(!force) killpg(pgrp, signo);
-	else killpg(pgrp, force);
+{	
+	if(pgrp!=1 && pgrp!=0) //I just want to make sure that we cannot kill init or sched
+	{
+		if(!force) killpg(pgrp, signo);
+		else killpg(pgrp, force);
+	}
 	exit(0);
 }
 
@@ -66,9 +70,12 @@ int main(int argc, char *argv[])
 	sigaction(SIGKILL, &sa, NULL);
 	sigaction(SIGQUIT, &sa, NULL);
 	sigaction(SIGINT, &sa, NULL);
+	sigaction(SIGHUP, &sa, NULL);
+
+	prctl(PR_SET_PDEATHSIG, SIGTERM); //we ask the kernel to send a SIGTERM to pgroup, when its parent is terminated
 
 	int wait_stat;
-	wait(&wait_stat);
+	wait(&wait_stat); //we wait until any of the subprocesses exit
 	sig_handler(SIGTERM);
 }
 

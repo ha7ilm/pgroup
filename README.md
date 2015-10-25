@@ -11,6 +11,8 @@ The parameter `-9` tells pgroup to send SIGKILL to all subprocesses instead of s
 
 For example, if you use `-9` and send SIGTERM to **pgroup**, it will send SIGKILL to all of its child processes.
 
+**pgroup** also terminates all of its subprocesses if its parent process ends, or any of its child processes end.
+
 ## Installing pgroup
 
 **pgroup** works on Linux. You can build it with *gcc* by:
@@ -63,7 +65,7 @@ Later it uses <a href="http://www.unix.com/man-page/linux/3/killpg">killpg()</a>
 
 It does not check if the signal is handled by all the processes in the group. 
 
-If you want to be absolutely sure that all subprocesses are terminated, you should use the `-9` switch.
-* The subprocesses cannot handle the SIGKILL signal, they are just stopped by the OS anyway.
-* On the other hand, they cannot properly close files and things, so only use it if necessary.
+If you want to be absolutely sure that all subprocesses are terminated, you should use the `-9` switch. If you do this:
+* the subprocesses cannot handle the SIGKILL signal, they are just stopped by the OS anyway;
+* on the other hand, they cannot properly close files and things, so only use it if necessary.
 
