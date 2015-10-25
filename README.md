@@ -19,7 +19,7 @@ For example, if you use `-9` and send SIGTERM to **pgroup**, it will send SIGKIL
 
     make && sudo make install
 
-## How to use in scripts
+## How to use in shell scripts
 
 ```bash
 #!/bin/bash
@@ -70,7 +70,7 @@ print
 os.system("pstree "+str(os.getpid()))
 ```
 
-In fact, executing a subprocess with setpgrp() has already been possible in python:
+In fact, executing a subprocess with *setpgrp()* and terminating the whole group has already been possible in python:
 
 ```python
 import subprocess, os, signal, time
@@ -83,7 +83,9 @@ os.system("pstree "+str(os.getpid()))
 ```
 
 However, the first version using `pgroup -9` is safer than doing this!
+
 What happens if we SIGKILL our python script? The subprocesses will remain... 
+
 If we use **pgroup**, it will get notified by the OS that it became orphaned, and it terminates itself and all of its subprocesses.
 
 ## How does it work
