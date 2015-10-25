@@ -57,6 +57,35 @@ void MainWindow::startAndStopSomeProcesses()
 }
 ```
 
+## How to use in python
+
+```python
+import subprocess, os, time
+myproc=subprocess.Popen(["pgroup","-9","bash","-c", "cat /dev/urandom | cat | cat >/dev/null" ])
+time.sleep(0.3)
+os.system("pstree "+str(os.getpid()))
+myproc.terminate()
+myproc.wait() #to end the zombie process that would remain
+print
+os.system("pstree "+str(os.getpid()))
+```
+
+In fact, executing a subprocess with setpgrp() has already been possible in python:
+
+```python
+import subprocess, os, signal, time
+myproc = subprocess.Popen("cat /dev/urandom | cat | cat >/dev/null", shell=True, preexec_fn=os.setpgrp) #<== python will fork(), setpgrp() and then exec(), the same that pgroup does
+time.sleep(0.3)
+os.system("pstree "+str(os.getpid()))
+os.killpg(os.getpgid(myproc.pid), signal.SIGKILL)
+myproc.wait()
+os.system("pstree "+str(os.getpid()))
+```
+
+However, the first version using `pgroup -9` is safer than doing this!
+What happens if we SIGKILL our python script? The subprocesses will remain... 
+If we use **pgroup**, it will get notified by the OS that it became orphaned, and it terminates itself and all of its subprocesses.
+
 ## How does it work
 
 When the **pgroup** process is started, it calls <a href="http://www.unix.com/man-page/linux/3/setpgrp/">setpgrp()</a>, so it becomes a session leader. 
