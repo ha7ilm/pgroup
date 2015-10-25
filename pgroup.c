@@ -59,7 +59,8 @@ int main(int argc, char *argv[])
 {
 	if(argc==1) { fprintf(stderr,"%s",usage); return 0; }
 	if(argc>=2 && !strcmp(argv[1],"-9") ) { force=SIGKILL; }
-	pgrp = setpgrp();
+	pgrp = setpgrp(); //it returns 0... 
+	pgrp = getpgrp();
 
 	childpid = fork();
 	if(!childpid) if(execvp(argv[1+!!force],argv+1+!!force)) { fprintf(stderr, MYNAME ": can't start subprocess, error in execvp().\n"); return -1; }
